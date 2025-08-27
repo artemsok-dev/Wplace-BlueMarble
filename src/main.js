@@ -261,6 +261,8 @@ function observeBlack() {
  */
 function buildOverlayMain() {
   let isMinimized = false; // Overlay state tracker (false = maximized, true = minimized)
+  let isColorFilterOpened = false;
+  let isWrongListOpened = true;
   // Load last saved coordinates (if any)
   let savedCoords = {};
   try { savedCoords = JSON.parse(GM_getValue('bmCoords', '{}')) || {}; } catch (_) { savedCoords = {}; }
@@ -551,7 +553,22 @@ function buildOverlayMain() {
       .buildElement()
       // Color filter UI
       .addDiv({'id': 'bm-contain-colorfilter', 'style': 'max-height: 140px; overflow: auto; border: 1px solid rgba(255,255,255,0.1); padding: 4px; border-radius: 4px; display: none;'})
-        .addDiv({'style': 'display: flex; gap: 6px; margin-bottom: 6px;'})
+        .addButton({'id': 'bm-colorfilter-show-hide', 'textContent': isColorFilterOpened ? '▲ Template Color Filter' : '▼ Template Color Filter'}, (instance, button) => {
+          button.onclick = () => {
+            isColorFilterOpened = !isColorFilterOpened;
+
+            const colorfilteritems = document.querySelectorAll('#bm-contain-colorfilter > div');
+            if (isColorFilterOpened) {
+              colorfilteritems[0].style.display = 'flex';
+              colorfilteritems[1].style.display = '';
+              button.textContent = '▲ Template Color Filter';
+            } else {
+              colorfilteritems.forEach(item => item.style.display = 'none');
+              button.textContent = '▼ Template Color Filter';
+            }
+          };
+        }).buildElement()
+        .addDiv({'style': `display: ${isColorFilterOpened ? 'flex' : 'none'}; gap: 6px; margin-bottom: 6px;`})
           .addButton({'id': 'bm-button-colors-enable-all', 'textContent': 'Enable All'}, (instance, button) => {
             button.onclick = () => {
               const t = templateManager.templatesArray[0];
@@ -571,7 +588,25 @@ function buildOverlayMain() {
             };
           }).buildElement()
         .buildElement()
-        .addDiv({'id': 'bm-colorfilter-list'}).buildElement()
+        .addDiv({'id': 'bm-colorfilter-list', 'style': isColorFilterOpened ? '' : 'display: none;'}).buildElement()
+      .buildElement()
+      // Wrong list
+      .addDiv({'id': 'bm-contain-wronglist', 'style': 'max-height: 140px; overflow: auto; border: 1px solid rgba(255,255,255,0.1); padding: 4px; border-radius: 4px;'})
+        .addButton({'id': 'bm-wronglist-show-hide', 'textContent': isWrongListOpened ? '▲ Wrong List' : '▼ Wrong List'}, (instance, button) => {
+          button.onclick = () => {
+            isWrongListOpened = !isWrongListOpened;
+
+            const wronglist = document.querySelector('#bm-wronglist-list');
+            if (isWrongListOpened) {
+              wronglist.style.display = '';
+              button.textContent = '▲ Wrong List';
+            } else {
+              wronglist.style.display = 'none';
+              button.textContent = '▼ Wrong List';
+            }
+          };
+        }).buildElement()
+        .addDiv({'id': 'bm-wronglist-list', 'style': isWrongListOpened ? '' : 'display: none;'}).buildElement()
       .buildElement()
       .addInputFile({'id': 'bm-input-file-template', 'textContent': 'Upload Template', 'accept': 'image/png, image/jpeg, image/webp, image/bmp, image/gif'}).buildElement()
       .addDiv({'id': 'bm-contain-buttons-template'})

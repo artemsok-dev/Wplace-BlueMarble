@@ -280,6 +280,7 @@ export default class TemplateManager {
     // We'll compute per-tile painted/wrong/required counts when templates exist for this tile
     let paintedCount = 0;
     let wrongCount = 0;
+    let wrongList = [];
     let requiredCount = 0;
     
     const tileBitmap = await createImageBitmap(tileBlob);
@@ -406,6 +407,8 @@ export default class TemplateManager {
                 paintedCount++; // ...the pixel is painted correctly
               } else {
                 wrongCount++; // ...the pixel is NOT painted correctly
+                wrongList.push([parseInt(tileCoords.substring(0, 4)), parseInt(tileCoords.substring(5, 9)), Math.floor(x / this.drawMult), Math.floor(y / this.drawMult)]);
+                //console.info("Blue Marble: WRONG PIXEL Tx: " + parseInt(tileCoords.substring(0, 4)) + ", Ty: " + parseInt(tileCoords.substring(5, 9)) + ", x: " + Math.floor(x / this.drawMult) + ", y: " + Math.floor(y / this.drawMult));
               }
             }
           }
@@ -493,18 +496,22 @@ export default class TemplateManager {
       this.tileProgress.set(tileKey, {
         painted: paintedCount,
         required: requiredCount,
-        wrong: wrongCount,
+        wrong: wrongList,
       });
 
       // Aggregate painted/wrong across tiles we've processed
       let aggPainted = 0;
       let aggRequiredTiles = 0;
       let aggWrong = 0;
+      let aggWrongList = [];
       for (const stats of this.tileProgress.values()) {
         aggPainted += stats.painted || 0;
         aggRequiredTiles += stats.required || 0;
-        aggWrong += stats.wrong || 0;
+        aggWrong += stats.wrong?.length || 0;
+        aggWrongList = aggWrongList.concat(stats.wrong || []);
       }
+
+      this.overlay.handleWrongList(aggWrongList);
 
       // Determine total required across all templates
       // Prefer precomputed per-template required counts; fall back to sum of processed tiles
@@ -605,8 +612,8 @@ export default class TemplateManager {
                     if (a < 64) { continue; }
                     if (r === 222 && g === 250 && b === 206) { continue; }
                     requiredPixelCount++;
-                    const key = activeTemplate.allowedColorsSet.has(`${r},${g},${b}`) ? `${r},${g},${b}` : 'other';
-                    paletteMap.set(key, (paletteMap.get(key) || 0) + 1);
+                    //const key = activeTemplate.allowedColorsSet.has(`${r},${g},${b}`) ? `${r},${g},${b}` : 'other';
+                    //paletteMap.set(key, (paletteMap.get(key) || 0) + 1);
                   }
                 }
               } catch (e) {

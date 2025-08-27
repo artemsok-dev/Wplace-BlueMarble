@@ -696,4 +696,18 @@ export default class Overlay {
     consoleError(`${this.name}: ${text}`); // Outputs something like "ScriptName: text" as an error message to the console
     this.updateInnerHTML(this.outputStatusId, 'Error: ' + text, true); // Update output Status box
   }
+
+  /** Update wrong list
+   * @param {Array<Array<number>>} aggWrongList - list of wrong pixels coordinates [Tx, Ty, x, y]
+   */
+  handleWrongList(aggWrongList) {
+    const wronglist = document.querySelector('#bm-wronglist-list');
+    wronglist.innerHTML = '';
+    for (const wrong of aggWrongList) {
+      let row = document.createElement('div');
+      row.style.fontSize = '12px';
+      row.textContent = `Tx: ${wrong[0]}, Ty: ${wrong[1]}, x: ${wrong[2]}, y: ${wrong[3]}`
+      wronglist.appendChild(row);
+    }
+  }
 }
