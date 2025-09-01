@@ -331,13 +331,13 @@ export default class TemplateManager {
 
           // Loops over all pixels in the template
           // Assigns each pixel a color (if center pixel)
-          for (let y = 0; y < tempHeight; y++) {
-            for (let x = 0; x < tempWidth; x++) {
+          for (let y = 1; y < tempHeight; y+=this.drawMult) {
+            for (let x = 1; x < tempWidth; x+=this.drawMult) {
               // Purpose: Count which pixels are painted correctly???
 
               // Only evaluate the center pixel of each shread block
               // Skip if not the center pixel of the shread block
-              if ((x % this.drawMult) !== 1 || (y % this.drawMult) !== 1) { continue; }
+              //if ((x % this.drawMult) !== 1 || (y % this.drawMult) !== 1) { continue; }
 
               const gx = x + offsetX;
               const gy = y + offsetY;
@@ -407,7 +407,7 @@ export default class TemplateManager {
                 paintedCount++; // ...the pixel is painted correctly
               } else {
                 wrongCount++; // ...the pixel is NOT painted correctly
-                wrongList.push([parseInt(tileCoords.substring(0, 4)), parseInt(tileCoords.substring(5, 9)), Math.floor(x / this.drawMult), Math.floor(y / this.drawMult)]);
+                wrongList.push([parseInt(tileCoords.substring(0, 4)), parseInt(tileCoords.substring(5, 9)), Math.floor(gx / this.drawMult), Math.floor(gy / this.drawMult)]);
                 //console.info("Blue Marble: WRONG PIXEL Tx: " + parseInt(tileCoords.substring(0, 4)) + ", Ty: " + parseInt(tileCoords.substring(5, 9)) + ", x: " + Math.floor(x / this.drawMult) + ", y: " + Math.floor(y / this.drawMult));
               }
             }
