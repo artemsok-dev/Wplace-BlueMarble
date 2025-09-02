@@ -228,7 +228,7 @@ input[type="file"][id*="template"] {
   font-size: small;
   background-color: rgba(0, 0, 0, 0.2);
   padding: 0 0.5ch;
-  height: 5em;
+  height: 6em;
   width: 100%;
 }
 
