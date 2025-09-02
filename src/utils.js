@@ -216,3 +216,72 @@ export const colorpalette = [
   { "id": 63, "premium": true,  "name": "Light Stone",   "rgb": [205, 197, 158] }
 ];
 // All entries include fixed id (index-based) and premium flag by design.
+
+/** Sort array of points by each other distance
+ * @param {Array<Array<number>>} points - source array
+ * @param {Array<number} startpoint - start point
+ * @returns - sorted array
+ */
+export function sortPointsByDistance(points, startpointidx = 0) {
+  if (points.length === 0) return [];
+
+  const sortedPoints = [points.splice(startpointidx, 1)[0]]; // Начинаем с первой точки
+  const remainingPoints = points; // Копируем оставшиеся точки
+
+  while (remainingPoints.length > 0) {
+      const lastPoint = sortedPoints[sortedPoints.length - 1];
+      let closestIndex = 0;
+      let minDistance = calculateDistance(lastPoint, remainingPoints[0]);
+
+      // Поиск ближайшей точки
+      for (let i = 1; i < remainingPoints.length; i++) {
+          const distance = calculateDistance(lastPoint, remainingPoints[i]);
+          if (distance < minDistance) {
+              minDistance = distance;
+              closestIndex = i;
+          }
+      }
+
+      // Перемещение найденной точки в отсортированный массив
+      sortedPoints.push(remainingPoints[closestIndex]);
+      remainingPoints.splice(closestIndex, 1);
+  }
+
+  return sortedPoints;
+}
+
+/**
+ * 
+ * @param {Array<Array<number>>} points 
+ * @param {Array<number>} point 
+ * @returns 
+ */
+function searchPointIndex(points, point) {
+  for (let index = 0; index < points.length; index++) {
+    const P = points[index];
+    if (P[2] == point[2] && P[3] == point[3])
+      return index;
+  }
+  return -1;
+}
+
+function calculateDistance(p1, p2) {
+  const dx = p1[2] - p2[2];
+  const dy = p1[3] - p2[3];
+  return dx * dx + dy * dy;
+}
+
+/**
+ * 
+ * @param {Array<Array<number>>} newpoints 
+ * @param {Array<Array<number>>} oldpoints 
+ * @returns 
+ */
+export function findNexPointIdx(newpoints, oldpoints) {
+  for (const point of oldpoints) {
+    const idx = searchPointIndex(newpoints, point);
+    if (idx != -1)
+      return idx;
+  }
+  return 0;
+}

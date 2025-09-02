@@ -1,5 +1,5 @@
 import Template from "./Template";
-import { base64ToUint8, numberToEncoded } from "./utils";
+import { base64ToUint8, findNexPointIdx, numberToEncoded, sortPointsByDistance } from "./utils";
 
 /** Manages the template system.
  * This class handles all external requests for template modification, creation, and analysis.
@@ -496,7 +496,7 @@ export default class TemplateManager {
       this.tileProgress.set(tileKey, {
         painted: paintedCount,
         required: requiredCount,
-        wrong: wrongList,
+        wrong: wrongList.length > 1 ? sortPointsByDistance(wrongList, findNexPointIdx(wrongList, this.tileProgress.get(tileKey)?.wrong ?? [])) : wrongList,
       });
 
       // Aggregate painted/wrong across tiles we've processed
@@ -522,10 +522,11 @@ export default class TemplateManager {
       // Turns numbers into formatted number strings. E.g., 1234 -> 1,234 OR 1.234 based on location of user
       const paintedStr = new Intl.NumberFormat().format(aggPainted);
       const requiredStr = new Intl.NumberFormat().format(totalRequired);
-      const wrongStr = new Intl.NumberFormat().format(totalRequired - aggPainted); // Used to be aggWrong, but that is bugged
+      const wrongStr = new Intl.NumberFormat().format(aggWrong); // Used to be aggWrong, but that is bugged
+      const missingStr = new Intl.NumberFormat().format(totalRequired - aggPainted - aggWrong);
 
       this.overlay.handleDisplayStatus(
-        `Displaying ${templateCount} template${templateCount == 1 ? '' : 's'}.\nPainted ${paintedStr} / ${requiredStr} • Wrong ${wrongStr}`
+        `Displaying ${templateCount} template${templateCount == 1 ? '' : 's'}.\nPainted ${paintedStr} / ${requiredStr} (${(aggPainted/totalRequired*100).toFixed(2)}%) • Wrong ${wrongStr} • Missing ${missingStr}`
       );
     } else {
       this.overlay.handleDisplayStatus(`Displaying ${templateCount} templates.`);
